@@ -24,7 +24,14 @@ if __name__ == '__main__':
 	swingGreat = pd.DataFrame(dict1.items(), columns=['Battter', 'Chase'])
 	swingLess = pd.DataFrame(dict2.items(), columns=['Battter', 'Chase'])
 
+	plt.title('Batter Chase\% >= 3 Times Through')
+	plt.hist(swingGreat['Chase'], bins=60)
+	plt.axvline(swingGreat['Chase'].mean(), color='k', linestyle='dashed', linewidth=1)
 
+	plt.xlabel('chase%')
+	plt.ylabel('number of batters')
+
+	plt.show()
 	#print(stats.f_oneway(swingLess['Chase'], swingGreat['Chase']))
 
 
