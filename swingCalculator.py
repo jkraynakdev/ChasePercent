@@ -21,7 +21,6 @@ class ChaseCalculator:
 
 		return swingList
 
-
 	# Returns a list of strike zones for elements in start-stop inclusive
 	def getZone(self, start: int, stop: int) -> list:
 		results = [[-.71, .71] for i in range(start, stop)]
