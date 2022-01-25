@@ -1,6 +1,5 @@
 from swingCalculator import ChaseCalculator
 from getPlayerStats import Get_Stats
-import os
 from csvFileEditor import filterOutIds
 import pandas as pd
 import numpy as np
@@ -9,14 +8,8 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import scipy
 
-'''
-	# correlation between  delta chase % and 
-	#print(stats.f_oneway(swingLess['Chase'], swingGreat['Chase']))
-
-
-	#print(stats.mannwhitneyu(swingLess['Chase'], swingGreat['Chase']))
-'''
-
+# Function that takes to dataframes and returns the change in
+# chase percent for each id
 def get_delta_chase(df_before, df_after) -> dict:
 	calculator_before = ChaseCalculator(df_before)
 	calculator_after = ChaseCalculator(df_after)
@@ -36,6 +29,7 @@ def get_delta_chase(df_before, df_after) -> dict:
 	return delta_chase
 
 
+# Returns a dictionary containing wobas for player IDs
 def get_wobas(filename: str, df) -> dict:
 	# Does not matter which calculator we use since player ids are equal
 	calculator_before = ChaseCalculator(df)
@@ -48,13 +42,14 @@ def get_wobas(filename: str, df) -> dict:
 
 	return wobas
 
-def pair_up_ids(delta_chase: dict, wobas: dict) -> dict:
+# Returns a list with [chase%, wOBA]
+def pair_up_ids(delta_chase: dict, wobas: dict) -> list:
 	paired_up_stats = []
 	for key, value in delta_chase.items():
 		paired_up_stats.append([value, wobas[key]])
 	return paired_up_stats
 
-
+# Runs a linear regression
 def run_regression(delta_chase: dict, wobas: dict) -> None:
 	paired_up_stats = pair_up_ids(delta_chase, wobas)
 	x_values = []
@@ -68,7 +63,7 @@ def run_regression(delta_chase: dict, wobas: dict) -> None:
 	print(regression.summary())
 
 
-
+# Data visualization function
 def build_graph(dict1, dict2) -> None:
 	swingGreat = pd.DataFrame(dict1.items(), columns=['Battter', 'Chase'])
 	swingLess = pd.DataFrame(dict2.items(), columns=['Battter', 'Chase'])
@@ -82,16 +77,16 @@ def build_graph(dict1, dict2) -> None:
 
 	plt.show()
 
-filename1, filename2 = 'Data/lessThan2_sorted.csv', 'Data/greaterThan3_sorted.csv'
 
+# Testing purposes
 if __name__ == '__main__':
 
+	filename1, filename2 = 'Data/lessThan2_sorted.csv', 'Data/greaterThan3_sorted.csv'
 
 	df1, df2 = filterOutIds(filename1, filename2)[0], filterOutIds(filename1, filename2)[1]
 	
 	delta_chase = get_delta_chase(df1, df2)
 	player_woba = get_wobas('Data/stats.csv', df1)
-	#run_regression(delta_chase, player_woba)
 
 
 	calculator1=ChaseCalculator(df1)
@@ -101,6 +96,7 @@ if __name__ == '__main__':
 	dict1 = calculator1.appendToDic()
 	dict2 = calculator2.appendToDic()
 
+	# Run pearson R test
 	print(scipy.stats.pearsonr(list(dict1.values()), list(dict2.values())))
 
 

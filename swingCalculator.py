@@ -15,14 +15,14 @@ class ChaseCalculator:
 						'swinging_strike_blocked': 'swing'}
 
 	# Return a list of batter taking/swinging at pitch
-	def getSwings(self, start: int, stop: int) -> list:
+	def get_swings(self, start: int, stop: int) -> list:
 		swingList = []
 		self.df['description'].iloc[start:stop].apply(lambda x: swingList.append(self.SWINGCONVERTER.get(x)))
 
 		return swingList
 
 	# Returns a list of strike zones for elements in start-stop inclusive
-	def getZone(self, start: int, stop: int) -> list:
+	def get_zone(self, start: int, stop: int) -> list:
 		results = [[-.71, .71] for i in range(start, stop)]
 		hor = []
 		ver = []
@@ -35,7 +35,7 @@ class ChaseCalculator:
 		return results
 
 	# returns wether a pitch should be called a strike or not
-	def checkInZone(self, x_cord: float, z_cord: float, zone: list) -> str:
+	def check_in_zone(self, x_cord: float, z_cord: float, zone: list) -> str:
 		if((zone[0] <= x_cord) 
 			and (zone[1] >= x_cord)
 			and (zone[2] <= z_cord) 
@@ -48,9 +48,9 @@ class ChaseCalculator:
 
 	# Itereates over start, stop and returns a list wether those pitches are in 
 	# the zone or not
-	def getInZone(self, start: int, stop: int) -> list:
+	def get_in_zone(self, start: int, stop: int) -> list:
 		answers = []
-		zones = self.getZone(start, stop)
+		zones = self.get_zone(start, stop)
 		x_cords = []
 		z_cords = []
 
@@ -61,12 +61,12 @@ class ChaseCalculator:
 		x_cords, z_cords = x_cords[0], z_cords[0]
 
 		for index in range(len(zones)):
-			answers.append(self.checkInZone(x_cords[index], z_cords[index], zones[index]))
+			answers.append(self.check_in_zone(x_cords[index], z_cords[index], zones[index]))
 
 		return answers
 
 	# Returns the chase% 
-	def chaseCalc(self, swings: list, strikes: list) -> int:
+	def chase_calc(self, swings: list, strikes: list) -> int:
 		chaseList = []
 
 		for i in range(len(swings)):
@@ -78,7 +78,7 @@ class ChaseCalculator:
 		return sum(chaseList)/len(chaseList)
 
 	# Returns a list that describes were the batters change
-	def getLengthOfId(self) -> list:
+	def get_len_id(self) -> list:
 		lengths = self.df['batter'].value_counts().values
 		for i in range(1, len(lengths)):		# mark
 			lengths[i] = lengths[i] + lengths[i-1]
@@ -86,25 +86,26 @@ class ChaseCalculator:
 		return lengths
 
 	# Returs the list of batter IDs
-	def getListOfId(self) -> list:
+	def get_list_id(self) -> list:
 		return self.df['batter'].unique()
 
 	# Packages the data nicely into a dictionary
 	def appendToDic(self) -> dict:
-		listOfIds = self.getListOfId()
-		lengthOfIds = self.getLengthOfId()
+		listOfIds = self.get_list_id()
+		lengthOfIds = self.get_len_id()
 
 		start = 0
 		playerChasePercent = {}
 
 		for i in range(len(lengthOfIds)):
-			swings = self.getSwings(start, lengthOfIds[i]-1)
-			strikes = self.getInZone(start, lengthOfIds[i]-1)
-			playerChasePercent[listOfIds[i]] = self.chaseCalc(swings, strikes)
+			swings = self.get_swings(start, lengthOfIds[i]-1)
+			strikes = self.get_in_zone(start, lengthOfIds[i]-1)
+			playerChasePercent[listOfIds[i]] = self.chase_calc(swings, strikes)
 			start = lengthOfIds[i]-1
 
 		return playerChasePercent
 
 if __name__ == '__main__':
-	df1 = pd.read_csv('threetimes/combined_csv_sorted.csv', encoding="utf-8-sig")
-	lessThanThree = ChaseCalculator(df1)
+	df1 = pd.read_csv('Data/greaterThan3_sorted.csv', encoding="utf-8-sig")
+	print(df1)
+	#lessThanThree = ChaseCalculator(df1)
