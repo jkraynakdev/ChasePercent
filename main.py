@@ -1,5 +1,5 @@
 from swingCalculator import ChaseCalculator
-from getPlayerStats import Get_Stats
+from stats_helper import Stats
 from csvFileEditor import filterOutIds
 import pandas as pd
 import numpy as np
@@ -16,8 +16,8 @@ def get_delta_chase(df_before, df_after) -> dict:
 
 	delta_chase = {}
 
-	dict1 = calculator_before.appendToDic()
-	dict2 = calculator_after.appendToDic()
+	dict1 = calculator_before.append_to_dic()
+	dict2 = calculator_after.append_to_dic()
 
 	# clumsy but still O(n)
 	for key, value in dict2.items(): 
@@ -30,12 +30,12 @@ def get_delta_chase(df_before, df_after) -> dict:
 
 
 # Returns a dictionary containing wobas for player IDs
-def get_wobas(filename: str, df) -> dict:
+def get_wobas(df) -> dict:
 	# Does not matter which calculator we use since player ids are equal
 	calculator_before = ChaseCalculator(df)
-	dict1 = calculator_before.appendToDic()
+	dict1 = calculator_before.append_to_dic()
 
-	woba_calculator = Get_Stats(filename, dict1)
+	woba_calculator = Stats(df, list(dict1.keys()))
 
 	# stores a dict of players wobas indexed by (id, woba)
 	wobas = woba_calculator.get_player_woba()
@@ -49,7 +49,14 @@ def pair_up_ids(delta_chase: dict, wobas: dict) -> list:
 		paired_up_stats.append([value, wobas[key]])
 	return paired_up_stats
 
-# Runs a linear regression
+# career_chase is smaller, so start with that, but fix this later
+def weighted_delta_chase(delta_chase: dict, career_chase: dict) -> dict:
+	weighted_chase = {}
+	for key, value in career_chase.items():
+		weighted_chase[key] = delta_chase[key]/career_chase[key]
+
+	return weighted_chase
+
 def run_regression(delta_chase: dict, wobas: dict) -> None:
 	paired_up_stats = pair_up_ids(delta_chase, wobas)
 	x_values = []
@@ -86,17 +93,32 @@ if __name__ == '__main__':
 	df1, df2 = filterOutIds(filename1, filename2)[0], filterOutIds(filename1, filename2)[1]
 	
 	delta_chase = get_delta_chase(df1, df2)
-	player_woba = get_wobas('Data/stats.csv', df1)
+	player_woba = get_wobas(df1)
 
 
-	calculator1=ChaseCalculator(df1)
+	calculator1 = ChaseCalculator(df1)
 	calculator2 = ChaseCalculator(df2)
 
 
-	dict1 = calculator1.appendToDic()
-	dict2 = calculator2.appendToDic()
+
+
+	dict1 = calculator1.append_to_dic()
+	dict2 = calculator2.append_to_dic()
+
+	df3 = pd.read_csv('Data/fangraphs_stats.csv')
+	stats = Stats(df3, list(dict1.keys()))
+	stats.get_chase()
+	chase_dic = stats.chase
+
+
+
+	#print(weighted_delta_chase(delta_chase, chase_dic))
+	#print(run_regression(weighted_delta_chase(delta_chase, chase_dic),player_woba))
+
 
 	# Run pearson R test
-	print(scipy.stats.pearsonr(list(dict1.values()), list(dict2.values())))
+	#print(scipy.stats.pearsonr(list(delta_chase.values()), list(player_woba.values())))
 
+	# Run wilcoxon		
+	#print(scipy.stats.wilcoxon(list(dict1.values()), list(dict2.values())))
 

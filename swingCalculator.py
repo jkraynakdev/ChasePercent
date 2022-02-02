@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 class ChaseCalculator:
 	def __init__(self, df):
 		# setup the data frame
@@ -7,12 +8,12 @@ class ChaseCalculator:
 
 		# Dict to connvert 'description' into swing/take
 		self.SWINGCONVERTER = {'hit_into_play': 'swing',
-						'foul': 'swing',
-						'ball': 'take',
-						'called_strike': 'take',
-						'blocked_ball': 'take',
-						'swinging_strike': 'swing',
-						'swinging_strike_blocked': 'swing'}
+								'foul': 'swing',
+								'ball': 'take',
+								'called_strike': 'take',
+								'blocked_ball': 'take',
+								'swinging_strike': 'swing',
+								'swinging_strike_blocked': 'swing'}
 
 	# Return a list of batter taking/swinging at pitch
 	def get_swings(self, start: int, stop: int) -> list:
@@ -90,7 +91,7 @@ class ChaseCalculator:
 		return self.df['batter'].unique()
 
 	# Packages the data nicely into a dictionary
-	def appendToDic(self) -> dict:
+	def append_to_dic(self) -> dict:
 		listOfIds = self.get_list_id()
 		lengthOfIds = self.get_len_id()
 
